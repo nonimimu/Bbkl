@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบตะกร้าสินค้า</title>
+    <style>
+        /* สไตล์พื้นฐานแบบ Soft UI / Glassmorphism */
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: #e0e5ec; /* สีพื้นหลังสว่างๆ */
+            padding: 20px; 
+            color: #333;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .product-card { 
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(10px); /* เอฟเฟกต์กระจก */
+            border-radius: 16px; 
+            padding: 15px; 
+            margin-bottom: 15px;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.05), -4px -4px 10px rgba(255,255,255,0.8);
+            display: flex; 
+            gap: 15px; 
+            align-items: center;
+        }
+        .product-card img { 
+            width: 80px; 
+            height: 80px; 
+            border-radius: 12px; 
+            object-fit: cover; 
+        }
+        .info { flex-grow: 1; }
+        .info h4 { margin: 0 0 5px 0; }
+        .controls { 
+            display: flex; 
+            gap: 12px; 
+            align-items: center; 
+            margin-top: 10px;
+        }
+        button { 
+            border: none; 
+            background: #e0e5ec; 
+            width: 30px;
+            height: 30px;
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1), -2px -2px 5px rgba(255,255,255,1);
+            transition: 0.2s;
+        }
+        button:active {
+            box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1), inset -2px -2px 5px rgba(255,255,255,1);
+        }
+        .summary {
+            background: #fff;
+            padding: 20px;
+            border-radius: 16px;
+            text-align: right;
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.05);
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>🛍️ รายการสินค้า</h2>
+        <div id="product-list"></div>
+
+        <div class="summary">
+            ราคารวมทั้งหมด: <span id="total-price" style="color: #ff4757;">0</span> บาท
+        </div>
+    </div>
+
+    <script>
+        // 1. ฐานข้อมูลสินค้า (เอยสามารถเพิ่มหรือเปลี่ยนรูป/ราคาตรงนี้ได้เลย)
+        // ถ้ารูปอยู่ในโฟลเดอร์เดียวกัน ก็เปลี่ยน "https..." เป็นชื่อไฟล์รูป เช่น "item1.jpg"
+        const products = [
+            { id: 1, name: "บัตรเติมเงินเกม 100 ฿", price: 100, image: "https://via.placeholder.com/80/ff7675/ffffff?text=Card", quantity: 0 },
+            { id: 2, name: "ไอเทมพิเศษ", price: 250, image: "https://via.placeholder.com/80/74b9ff/ffffff?text=Item", quantity: 0 },
+            { id: 3, name: "บริการกดรับของ", price: 50, image: "https://via.placeholder.com/80/55efc4/ffffff?text=Service", quantity: 0 }
+        ];
+
+        // 2. ฟังก์ชันวาดหน้าเว็บ (เอาข้อมูลด้านบนมาสร้างเป็น HTML)
+        function renderProducts() {
+            const container = document.getElementById('product-list');
+            container.innerHTML = ''; // ล้างของเก่าก่อนวาดใหม่
+            
+            // วนลูปสร้างการ์ดสินค้าทีละอัน
+            products.forEach((product, index) => {
+                container.innerHTML += `
+                    <div class="product-card">
+                        <img src="${product.image}" alt="${product.name}">
+                        <div class="info">
+                            <h4>${product.name}</h4>
+                            <small>ราคา: ${product.price} ฿</small>
+                            <div class="controls">
+                                <button onclick="updateQty(${index}, -1)">-</button>
+                                <span>${product.quantity}</span>
+                                <button onclick="updateQty(${index}, 1)">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            updateTotal(); // อัปเดตราคาตอนวาดเสร็จ
+        }
+
+        // 3. ฟังก์ชันจัดการตอนกดปุ่ม + และ -
+        function updateQty(index, change) {
+            // เช็คว่าจำนวนต้องไม่ติดลบ
+            if (products[index].quantity + change >= 0) {
+                products[index].quantity += change;
+                renderProducts(); // สั่งให้วาดหน้าจอใหม่เพื่อให้เลขขยับ
+            }
+        }
+
+        // 4. ฟังก์ชันคำนวณราคารวมทั้งหมด
+        function updateTotal() {
+            // เอา (ราคา * จำนวน) ของทุกชิ้นมาบวกกัน
+            const total = products.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            document.getElementById('total-price').innerText = total;
+        }
+
+        // สั่งให้วาดหน้าเว็บทันทีที่เปิดหน้านี้ขึ้นมา
+        renderProducts();
+    </script>
+
+</body>
+</html>
